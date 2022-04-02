@@ -86,9 +86,30 @@ public:
 	//				instruction_byte: Instruction byte(s) to add.
 	//-----------------------------------------------------------------------------
 	template< typename... BYTES >
-	void add( BYTES... instruction_bytes )
+	void add_byte( BYTES... instruction_bytes )
 	{
 		( assembler_instructions.insert( static_cast< std::byte >( instruction_bytes ) ), ... );
+	}
+
+	//-----------------------------------------------------------------------------
+	// @PURPOSE : Adds a pointer to byte list.
+	// @INPUT   :
+	//				pointer: Pointer to add to the list.
+	//-----------------------------------------------------------------------------
+	template< typename... BYTES >
+	void add_pointer( BYTES... pointer )
+	{
+		std::byte instruction_bytes_array[ sizeof( std::uintptr_t ) ]{ };
+
+		auto write_instruction = [ & ]( std::uintptr_t pointer ) {
+			std::memcpy( instruction_bytes_array, &pointer, sizeof( std::uintptr_t ) );
+
+			for ( auto& iterator : instruction_bytes_array ) {
+				assembler_instructions.insert( iterator );
+			}
+		};
+
+		( write_instruction( pointer ), ... );
 	}
 
 	//-----------------------------------------------------------------------------
