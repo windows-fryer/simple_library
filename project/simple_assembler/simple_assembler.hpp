@@ -96,8 +96,8 @@ public:
 	// @INPUT   :
 	//				pointer: Pointer to add to the list.
 	//-----------------------------------------------------------------------------
-	template< typename... BYTES >
-	void add_pointer( BYTES... pointer )
+	template< typename... POIINTERS >
+	void add_pointer( POIINTERS... pointer )
 	{
 		std::byte instruction_bytes_array[ sizeof( std::uintptr_t ) ]{ };
 
@@ -113,13 +113,30 @@ public:
 	}
 
 	//-----------------------------------------------------------------------------
+	// @PURPOSE : Adds a char array to byte list.
+	// @INPUT   :
+	//				char_array: Char array to add to the list.
+	//-----------------------------------------------------------------------------
+	template< typename... CHARS >
+	void add_char( CHARS... char_array )
+	{
+		auto write_instruction = [ & ]( unsigned char* char_array ) {
+			for ( int iterator = 0; char_array[ iterator ] != '\0'; iterator++ ) {
+				assembler_instructions.insert( std::byte{ char_array[ iterator ] } );
+			}
+		};
+
+		( write_instruction( reinterpret_cast< unsigned char* >( char_array ) ), ... );
+	}
+
+	//-----------------------------------------------------------------------------
 	// @PURPOSE : Erases all current bytes.
 	// @INPUT   : No arguments.
 	//-----------------------------------------------------------------------------
 	void clear( )
 	{
-		for ( auto iterator = assembler_instructions.begin( ); iterator != assembler_instructions.end( ); ++iterator ) {
-			iterator.erase( );
+		for ( auto iterator = assembler_instructions.begin( ); iterator != assembler_instructions.end( ); ) {
+			iterator = iterator.erase( );
 		}
 	}
 };

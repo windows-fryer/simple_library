@@ -29,9 +29,16 @@ typedef long( __stdcall* NtProtectVirtualMemory )( handle, void**, unsigned long
 
 struct simple_process {
 protected:
+	struct simple_module {
+	public:
+		char name[ 256 ]{ };
+		hmodule handle{ };
+	};
+
 	handle process_handle{ };
 	std::string_view process_name{ };
 	std::size_t process_base_address{ };
+	simple_vector< simple_module > process_modules{ };
 
 	//-----------------------------------------------------------------------------
 	// @PURPOSE : Finds windows handle.
@@ -93,16 +100,24 @@ protected:
 			return { };
 		}
 
+		std::size_t temp_process_base_address{ };
+
 		do {
+			simple_module temp_module{ };
+
+			strcpy_s( temp_module.name, module_entry.szModule );
+			temp_module.handle = module_entry.hModule;
+
+			process_modules.insert( temp_module );
+
 			if ( !strcmp( module_entry.szModule, process_name.data( ) ) ) {
-				CloseHandle( snapshot );
-				return reinterpret_cast< std::size_t >( module_entry.modBaseAddr );
+				temp_process_base_address = reinterpret_cast< std::size_t >( module_entry.modBaseAddr );
 			}
 		} while ( Module32Next( snapshot, &module_entry ) );
 
 		CloseHandle( snapshot );
 
-		return { };
+		return temp_process_base_address;
 	}
 
 public:
@@ -168,11 +183,10 @@ public:
 	}
 
 	//-----------------------------------------------------------------------------
-	// @PURPOSE : Allocates a function to be ran with run_function.
-	// @INPUT   :
-	//				function_bytes: The bytes to be allocated.
+	// @PURPOSE : Allocates a section of bytes to be ran with run_function.
+	// @INPUT   : No arguments.
 	//-----------------------------------------------------------------------------
-	std::uintptr_t allocate_function( )
+	std::uintptr_t allocate_bytes( )
 	{
 		auto bytes_to_be_allocated = process_assembler.assembler_instructions.size( );
 		auto bytes_allocated       = bytes_to_be_allocated;
@@ -235,7 +249,7 @@ public:
 	// @INPUT   :
 	//				address: The address of the function.
 	//-----------------------------------------------------------------------------
-	void free_function( std::uintptr_t address )
+	void free_bytes( std::uintptr_t address )
 	{
 		hmodule nt_dll = LoadLibrary( "ntdll.dll" );
 
@@ -254,14 +268,14 @@ public:
 	//-----------------------------------------------------------------------------
 	void execute_function( )
 	{
-		std::uintptr_t function_address = allocate_function( );
+		std::uintptr_t function_address = allocate_bytes( );
 
 		if ( !function_address ) {
 			return;
 		}
 
 		run_function( function_address );
-		free_function( function_address );
+		free_bytes( function_address );
 	}
 
 	//-----------------------------------------------------------------------------
@@ -272,6 +286,24 @@ public:
 	{
 		return process_base_address;
 	}
+
+	//	//-----------------------------------------------------------------------------
+	//	// @PURPOSE : Gets an export from the process.
+	//	// @INPUT   :
+	//	//				module_name: The name of the module.
+	//	//				export_name: The name of the export.
+	//	//-----------------------------------------------------------------------------
+	//	template< typename EXPORT >
+	//	EXPORT get_export( const char* module_name, const char* export_name )
+	//	{
+	//		for ( auto module : process_modules ) {
+	//			if ( !strcmp( module.name, module_name ) ) {
+	//				return reinterpret_cast< EXPORT >( GetProcAddress( module.handle, export_name ) );
+	//			}
+	//		}
+	//
+	//		return { };
+	//	}
 };
 
 #endif // LIBRARY_TESTING_SIMPLE_PROCESS_HPP
