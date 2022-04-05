@@ -38,9 +38,9 @@ void my_template_function( T /* OR C++23 auto */ arg );
 
 my_template_function< int >( 23 );
 /* ~Functions~ */
-
-/* ~Other~ */
-// Strings arguments should always be, string_view, and C strings (char* with null terminator).
-// Always use modern C++ casting such as, reinterpret, static, and const.
-/* ~Other~ */
 ```
+
+### Notes
+> Strings arguments should always be, string_view, and C strings (char* with null terminator).
+
+> Always use modern C++ casting such as, reinterpret, static, and const.
