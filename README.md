@@ -17,7 +17,7 @@ class c_base_class; => struct c_base_class;
 class my_class; => struct my_struct;
 /* ~Forward Definitions~ */
 
-/* ~Structs */
+/* ~Structs~ */
 struct my_struct {
   private:
     int my_private_int;
@@ -28,7 +28,7 @@ struct my_struct {
   protected:
     int my_protected_int;
 }
-/* ~Structs */
+/* ~Structs~ */
 
 /* ~Functions~ */
 void my_function( int my_arg, int my_arg );
@@ -41,6 +41,6 @@ my_template_function< int >( 23 );
 
 /* ~Other~ */
 // Strings arguments should always be, string_view, and C strings (char* with null terminator).
-// Always use modern c++ casting such as, reinterpret, static, and const.
+// Always use modern C++ casting such as, reinterpret, static, and const.
 /* ~Other~ */
 ```
