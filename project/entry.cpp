@@ -1,12 +1,18 @@
-#include <atomic>
-#include <chrono>
+#include <cassert>
+#include <cstddef>
+#include <cstdint>
+#include <cstdlib>
+#include <cstring>
+#include <dirent.h>
+#include <fstream>
 #include <iostream>
-#include <random>
+#include <string_view>
 
 #include "simple_process/simple_process.hpp"
 
 int main( )
 {
+#ifdef _WIN32
 	simple_process process{ "simple_library_test.exe" };
 
 	while ( !GetAsyncKeyState( VK_END ) ) {
@@ -36,6 +42,9 @@ int main( )
 		process.execute_function( );
 		process.free_bytes( allocated_text );
 	}
+#elif linux
+
+#endif
 
 	return 0;
 }
