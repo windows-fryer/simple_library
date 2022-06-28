@@ -96,8 +96,8 @@ public:
 	// @INPUT   :
 	//				pointer: Pointer to add to the list.
 	//-----------------------------------------------------------------------------
-	template< typename... POIINTERS >
-	void add_pointer( POIINTERS... pointer )
+	template< typename... POINTERS >
+	void add_pointer( POINTERS... pointer )
 	{
 		std::byte instruction_bytes_array[ sizeof( std::uintptr_t ) ]{ };
 
